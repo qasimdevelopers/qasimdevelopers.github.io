@@ -230,24 +230,30 @@
   .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center;}
   .loading-screen .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:20px;}
   @keyframes spin{to{transform:rotate(360deg);}}
+  .filter-loading{opacity:0.5;pointer-events:none;}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'https://mrcp.bonto.run/api';
 
 const state = {
   screen: 'loading',
-  library: [],
-  sources: {},
-  sourceCounts: {},
-  qCount: 0,
+  // Metadata only (lightweight)
+  metadata: {
+    totalQuestions: 0,
+    sources: {}, // sourceName -> { subjects: [], counts: { subject: count } }
+    sourceCounts: {}, // sourceName -> { subject: count }
+    allSubjects: [], // all subject names
+  },
+  // UI state
   selSource: 'ALL',
   selSubjects: new Set(['ALL']),
   statusFilter: 'all',
   mode: 'tutor',
   blockSize: 40,
+  // Quiz state (questions loaded on demand)
   progress: {},
   block: [],
   idx: 0,
@@ -256,6 +262,8 @@ const state = {
   timerSec: 0,
   timerHandle: null,
   flashFlipped: false,
+  // Loading state for starting quiz
+  startingQuiz: false,
 };
 
 const TIMED_SECONDS = 90;
@@ -296,67 +304,88 @@ function normalizeQuestion(q) {
   };
 }
 
-async function fetchData(){
+async function fetchMetadata() {
   try {
+    // Get sources and their subjects
     const sourcesResp = await fetch(`${API_BASE}/sources`);
     const sourcesData = await sourcesResp.json();
-    state.sources = sourcesData.sources;
+    const sources = sourcesData.sources || {};
     
+    // Get total count from stats
     const statsResp = await fetch(`${API_BASE}/stats`);
     const statsData = await statsResp.json();
-    state.qCount = statsData.totalQuestions;
+    const totalQuestions = statsData.totalQuestions || 0;
     
+    // Get subject counts for ALL sources
     const allCountsResp = await fetch(`${API_BASE}/subject-counts/ALL`);
-    const allCounts = await allCountsResp.json();
-    state.sourceCounts = { 'ALL': allCounts.counts };
+    const allCountsData = await allCountsResp.json();
+    const allCounts = allCountsData.counts || {};
     
-    for (const source of Object.keys(state.sources)) {
+    // Get subject counts for each source
+    const sourceCounts = {};
+    const allSubjectsSet = new Set();
+    
+    // Add ALL counts
+    sourceCounts['ALL'] = allCounts;
+    Object.keys(allCounts).forEach(subj => allSubjectsSet.add(subj));
+    
+    // Get per-source counts
+    for (const source of Object.keys(sources)) {
       const resp = await fetch(`${API_BASE}/subject-counts/${encodeURIComponent(source)}`);
       const data = await resp.json();
-      state.sourceCounts[source] = data.counts;
+      sourceCounts[source] = data.counts || {};
+      Object.keys(sourceCounts[source]).forEach(subj => allSubjectsSet.add(subj));
     }
     
-    const allQuestionsResp = await fetch(`${API_BASE}/questions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: 'ALL', subject: 'ALL', count: 50000, shuffle: false })
-    });
-    const allData = await allQuestionsResp.json();
-    state.library = allData.questions.map(q => normalizeQuestion(q));
+    state.metadata = {
+      totalQuestions,
+      sources,
+      sourceCounts,
+      allSubjects: Array.from(allSubjectsSet).sort()
+    };
     
     return true;
   } catch(e) {
-    console.error('Error fetching data:', e);
-    alert('Could not connect to API. Make sure the server is running on http://localhost:3000');
+    console.error('Error fetching metadata:', e);
+    alert('Could not connect to API. Make sure the server is running.');
     return false;
   }
 }
 
-async function fetchQuestions(source, subject, count){
+async function fetchQuestions(source, subject, count) {
   try {
     const resp = await fetch(`${API_BASE}/questions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source, subject, count, shuffle: true })
+      body: JSON.stringify({ source, subject, count, shuffle: false })
     });
     const data = await resp.json();
-    return data.questions || [];
+    return (data.questions || []).map(q => normalizeQuestion(q));
   } catch(e) {
     console.error('Error fetching questions:', e);
     return [];
   }
 }
 
-function subjectsForSource(sourceName){
-  if(sourceName === 'ALL'){
-    const all = new Set();
-    Object.values(state.sources).forEach(set => set.forEach(s => all.add(s)));
-    return Array.from(all).sort();
+function subjectsForSource(sourceName) {
+  if (sourceName === 'ALL') {
+    return state.metadata.allSubjects;
   }
-  return Array.from(state.sources[sourceName] || []).sort();
+  const subjects = state.metadata.sources[sourceName] || [];
+  return Array.from(subjects).sort();
+}
+
+function getSubjectCounts(sourceName) {
+  return state.metadata.sourceCounts[sourceName] || {};
+}
+
+function totalForSource(sourceName) {
+  const counts = getSubjectCounts(sourceName);
+  return Object.values(counts).reduce((sum, c) => sum + c, 0);
 }
 
 function matchesStatus(q){
+  // This now works on the loaded block only
   const p = getProgress(q.id);
   switch(state.statusFilter){
     case 'unused': return !p || !p.status;
@@ -367,30 +396,17 @@ function matchesStatus(q){
   }
 }
 
-function filteredQuestions(){
-  return state.library.filter(q => {
-    if(state.selSource !== 'ALL' && q._source !== state.selSource) return false;
-    if(!state.selSubjects.has('ALL') && !state.selSubjects.has(q._subject)) return false;
-    if(!matchesStatus(q)) return false;
-    return true;
-  });
-}
-
 function statusCounts(){
-  const pool = state.library.filter(q => {
-    if(state.selSource !== 'ALL' && q._source !== state.selSource) return false;
-    if(!state.selSubjects.has('ALL') && !state.selSubjects.has(q._subject)) return false;
-    return true;
-  });
+  // This now works on the loaded block only
   let unused=0, correct=0, incorrect=0, flagged=0;
-  pool.forEach(q => {
+  state.block.forEach(q => {
     const p = getProgress(q.id);
     if(!p || !p.status) unused++;
     if(p && p.status === 'correct') correct++;
     if(p && p.status === 'incorrect') incorrect++;
     if(p && p.flagged) flagged++;
   });
-  return {all: pool.length, unused, correct, incorrect, flagged};
+  return {all: state.block.length, unused, correct, incorrect, flagged};
 }
 
 function render(){
@@ -403,7 +419,7 @@ function render(){
 }
 
 function topbar(){
-  const loaded = state.library.length > 0;
+  const loaded = state.metadata.totalQuestions > 0;
   const bar = el(`
     <div class="topbar">
       <div class="brand">
@@ -414,7 +430,7 @@ function topbar(){
         </div>
       </div>
       <div class="topbar-right">
-        ${loaded ? `<span class="mono">${state.qCount.toLocaleString()} questions</span>` : 'Loading...'}
+        ${loaded ? `<span class="mono">${state.metadata.totalQuestions.toLocaleString()} questions</span>` : 'Loading...'}
         <span class="pulse-dot ${loaded ? '' : 'off'}"></span>
       </div>
     </div>
@@ -437,19 +453,34 @@ function loadingScreen(){
     <div class="loading-screen">
       <div class="spinner"></div>
       <h2 class="disp" style="font-size:22px;margin:0 0 8px;">Loading from API</h2>
-      <p style="color:var(--text-dimmer);font-size:14px;">Fetching questions...</p>
+      <p style="color:var(--text-dimmer);font-size:14px;">Fetching question metadata...</p>
     </div>
   `);
 }
 
 function configScreen(){
-  const counts = statusCounts();
   const wrap = el('<div></div>');
+  
+  // Calculate available count based on metadata
+  const availableCount = state.selSource === 'ALL' 
+    ? state.metadata.totalQuestions
+    : totalForSource(state.selSource);
+  
+  // Count filtered subjects
+  let filteredCount = 0;
+  const counts = getSubjectCounts(state.selSource);
+  if (state.selSubjects.has('ALL')) {
+    filteredCount = availableCount;
+  } else {
+    state.selSubjects.forEach(subj => {
+      filteredCount += counts[subj] || 0;
+    });
+  }
 
   wrap.appendChild(el(`<div style="margin-bottom:22px;">
     <div class="upload-eyebrow">Select Your Block</div>
     <h1 class="disp" style="font-size:26px;margin:6px 0 4px;">Choose Source & Subject</h1>
-    <p style="color:var(--text-dim);font-size:14px;margin:0;">${state.qCount.toLocaleString()} questions across ${Object.keys(state.sources).length} sources</p>
+    <p style="color:var(--text-dim);font-size:14px;margin:0;">${state.metadata.totalQuestions.toLocaleString()} questions across ${Object.keys(state.metadata.sources).length} sources</p>
   </div>`));
 
   const grid = el('<div class="grid-2"></div>');
@@ -472,14 +503,13 @@ function configScreen(){
   const sourcePanel = el('<div class="panel"><h2>Source</h2><div class="pill-row" id="source-row"></div></div>');
   const sourceRow = sourcePanel.querySelector('#source-row');
   
-  const allTotal = Object.values(state.sourceCounts['ALL'] || {}).reduce((sum, c) => sum + c, 0);
+  const allTotal = state.metadata.totalQuestions;
   sourceRow.appendChild(pillBtn('All Sources', allTotal, state.selSource==='ALL', () => {
     state.selSource = 'ALL'; state.selSubjects = new Set(['ALL']); render();
   }));
   
-  Object.keys(state.sources).sort().forEach(src => {
-    const counts = state.sourceCounts[src] || {};
-    const total = Object.values(counts).reduce((sum, c) => sum + c, 0);
+  Object.keys(state.metadata.sources).sort().forEach(src => {
+    const total = totalForSource(src);
     sourceRow.appendChild(pillBtn(src, total, state.selSource===src, () => {
       state.selSource = src; state.selSubjects = new Set(['ALL']); render();
     }));
@@ -489,7 +519,7 @@ function configScreen(){
   const subjPanel = el('<div class="panel"><h2>Subject</h2><div class="pill-row" id="subject-row"></div></div>');
   const subjRow = subjPanel.querySelector('#subject-row');
   
-  const countsObj = state.sourceCounts[state.selSource] || {};
+  const countsObj = getSubjectCounts(state.selSource);
   const subjList = Object.keys(countsObj).sort();
   const totalSubjQuestions = Object.values(countsObj).reduce((sum, c) => sum + c, 0);
   
@@ -509,17 +539,18 @@ function configScreen(){
   });
   left.appendChild(subjPanel);
 
+  // Status panel - shows counts for the currently selected block (placeholder until block is loaded)
   const statusPanel = el('<div class="panel"><h2>Status</h2><div class="pill-row" id="status-row"></div></div>');
   const statusRow = statusPanel.querySelector('#status-row');
   const statusDefs = [
-    {id:'all', label:'All', n:counts.all, cls:''},
-    {id:'unused', label:'Unused', n:counts.unused, cls:''},
-    {id:'correct', label:'Correct', n:counts.correct, cls:'status-correct'},
-    {id:'incorrect', label:'Incorrect', n:counts.incorrect, cls:'status-incorrect'},
-    {id:'flagged', label:'Flagged', n:counts.flagged, cls:'status-flagged'},
+    {id:'all', label:'All', cls:''},
+    {id:'unused', label:'Unused', cls:''},
+    {id:'correct', label:'Correct', cls:'status-correct'},
+    {id:'incorrect', label:'Incorrect', cls:'status-incorrect'},
+    {id:'flagged', label:'Flagged', cls:'status-flagged'},
   ];
   statusDefs.forEach(s => {
-    const b = el(`<button class="pill ${s.cls} ${state.statusFilter===s.id?'active':''}">${s.label}<span class="count">${s.n}</span></button>`);
+    const b = el(`<button class="pill ${s.cls} ${state.statusFilter===s.id?'active':''}">${s.label}<span class="count">0</span></button>`);
     b.addEventListener('click', () => { state.statusFilter = s.id; render(); });
     statusRow.appendChild(b);
   });
@@ -527,10 +558,9 @@ function configScreen(){
 
   grid.appendChild(left);
 
-  const filtered = filteredQuestions();
-  const maxBlock = Math.max(1, filtered.length);
-  if(state.blockSize > filtered.length) state.blockSize = Math.max(1, filtered.length);
-  if(state.blockSize < 1) state.blockSize = 1;
+  // Right panel - summary
+  const maxBlock = Math.max(1, filteredCount);
+  const effectiveBlockSize = Math.min(state.blockSize, maxBlock);
 
   const subjLabel = state.selSubjects.has('ALL') ? 'All Subjects' :
     (state.selSubjects.size===1 ? Array.from(state.selSubjects)[0] : state.selSubjects.size + ' subjects selected');
@@ -544,12 +574,12 @@ function configScreen(){
       <div class="summary-row"><span class="label">Mode</span><span class="val">${MODES.find(m=>m.id===state.mode).title}</span></div>
       ${state.mode!=='flashcards' ? `
       <div class="slider-wrap">
-        <div class="slider-head"><span>Block Size</span><span class="n mono" id="block-size-label">${state.blockSize} Qs</span></div>
-        <input type="range" id="block-size" min="1" max="${maxBlock}" value="${state.blockSize}">
+        <div class="slider-head"><span>Block Size</span><span class="n mono" id="block-size-label">${effectiveBlockSize} Qs</span></div>
+        <input type="range" id="block-size" min="1" max="${maxBlock}" value="${effectiveBlockSize}">
       </div>` : ''}
-      <div class="avail-note">${filtered.length.toLocaleString()} question${filtered.length===1?'':'s'} available</div>
-      <button class="btn btn-primary start-btn" id="start-btn" ${filtered.length===0?'disabled':''}>
-        ${state.mode==='flashcards' ? 'Start Flashcards' : 'Start Block'} →
+      <div class="avail-note">${filteredCount.toLocaleString()} question${filteredCount===1?'':'s'} available</div>
+      <button class="btn btn-primary start-btn" id="start-btn" ${filteredCount===0||state.startingQuiz?'disabled':''}>
+        ${state.startingQuiz ? 'Loading...' : (state.mode==='flashcards' ? 'Start Flashcards' : 'Start Block')} →
       </button>
     </div>
   `);
@@ -558,11 +588,13 @@ function configScreen(){
     const slider = right.querySelector('#block-size');
     const label = right.querySelector('#block-size-label');
     slider.addEventListener('input', () => {
-      state.blockSize = parseInt(slider.value,10);
-      label.textContent = state.blockSize + ' Qs';
+      const val = parseInt(slider.value,10);
+      state.blockSize = val;
+      label.textContent = val + ' Qs';
     });
   }
-  right.querySelector('#start-btn').addEventListener('click', () => startBlock());
+  const startBtn = right.querySelector('#start-btn');
+  startBtn.addEventListener('click', () => startBlock());
 
   grid.appendChild(right);
   wrap.appendChild(grid);
@@ -576,26 +608,45 @@ function pillBtn(label, count, active, onClick){
 }
 
 async function startBlock(){
-  const filtered = filteredQuestions();
-  if(filtered.length === 0) return;
-
-  if(state.mode === 'flashcards'){
-    state.block = filtered.slice();
-    state.idx = 0;
-    state.flashFlipped = false;
-    state.screen = 'flash';
-    render();
-    return;
-  }
-
-  const n = Math.min(state.blockSize, filtered.length);
-  state.block = filtered.slice(0, n);
-  state.idx = 0;
-  state.revealed = false;
-  state.reviewMode = false;
-  state.screen = 'quiz';
-  if(state.mode === 'timed') startTimer();
+  if (state.startingQuiz) return;
+  
+  const source = state.selSource;
+  const subject = state.selSubjects.has('ALL') ? 'ALL' : Array.from(state.selSubjects)[0];
+  const count = state.mode === 'flashcards' ? 100 : state.blockSize;
+  
+  state.startingQuiz = true;
   render();
+
+  try {
+    const questions = await fetchQuestions(source, subject, count);
+    
+    if (questions.length === 0) {
+      state.startingQuiz = false;
+      render();
+      alert('No questions found matching your criteria.');
+      return;
+    }
+
+    state.block = questions;
+    state.idx = 0;
+    state.startingQuiz = false;
+
+    if (state.mode === 'flashcards') {
+      state.flashFlipped = false;
+      state.screen = 'flash';
+    } else {
+      state.revealed = false;
+      state.reviewMode = false;
+      state.screen = 'quiz';
+      if (state.mode === 'timed') startTimer();
+    }
+    render();
+  } catch (e) {
+    state.startingQuiz = false;
+    render();
+    alert('Failed to load questions. Please try again.');
+    console.error(e);
+  }
 }
 
 function startTimer(){
@@ -934,7 +985,7 @@ async function init(){
   state.screen = 'loading';
   render();
   
-  const success = await fetchData();
+  const success = await fetchMetadata();
   if (success) {
     state.screen = 'config';
     render();
