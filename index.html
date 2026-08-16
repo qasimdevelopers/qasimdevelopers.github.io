@@ -6,7 +6,6 @@
 <title>Recall — MCQ Trainer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root{
     --bg:#080d18;
@@ -50,7 +49,6 @@
   button{font-family:inherit;}
   a{color:inherit;}
 
-  /* ---------- App shell ---------- */
   #app{min-height:100vh;display:flex;flex-direction:column;}
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
@@ -74,7 +72,6 @@
   main{flex:1;display:flex;flex-direction:column;}
   .wrap{max-width:1180px;margin:0 auto;width:100%;padding:28px 24px 60px;}
 
-  /* ---------- Buttons ---------- */
   .btn{
     appearance:none;border:1px solid var(--border);background:var(--panel-2);
     color:var(--text);padding:10px 16px;border-radius:10px;font-size:13.5px;font-weight:600;
@@ -91,10 +88,7 @@
   .btn-ghost{background:transparent;border-color:var(--border-soft);color:var(--text-dim);}
   .btn-ghost:hover{color:var(--text);border-color:var(--border);}
   .btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px;}
-  .btn-danger-outline{border-color:rgba(255,107,107,.4);color:var(--red);background:transparent;}
-  .btn-danger-outline:hover{background:var(--red-dim);}
 
-  /* ---------- Pills ---------- */
   .pill-row{display:flex;flex-wrap:wrap;gap:8px;}
   .pill{
     border:1px solid var(--border);background:var(--panel-2);color:var(--text-dim);
@@ -109,7 +103,6 @@
   .pill.status-incorrect.active{background:var(--red-dim);border-color:rgba(255,107,107,.4);color:var(--red);}
   .pill.status-flagged.active{background:var(--amber-dim);border-color:rgba(245,185,66,.4);color:var(--amber);}
 
-  /* ---------- Cards / panels ---------- */
   .panel{
     background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);
     padding:22px 24px;
@@ -122,44 +115,6 @@
   .grid-2{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start;}
   @media (max-width:920px){.grid-2{grid-template-columns:1fr;}}
 
-  /* ---------- Upload screen ---------- */
-  .upload-hero{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;padding:80px 20px 40px;
-  }
-  .upload-eyebrow{
-    font-family:'JetBrains Mono';font-size:12px;color:var(--accent);letter-spacing:2px;
-    text-transform:uppercase;margin-bottom:14px;
-  }
-  .upload-hero h1{
-    font-family:'Space Grotesk';font-size:42px;line-height:1.15;margin:0 0 14px;font-weight:700;
-    max-width:640px;
-  }
-  .upload-hero p{color:var(--text-dim);font-size:15.5px;max-width:480px;line-height:1.6;margin:0 0 32px;}
-  .dropzone{
-    width:100%;max-width:560px;border:1.5px dashed var(--border);border-radius:18px;
-    padding:40px 30px;background:var(--panel);cursor:pointer;transition:.15s ease;
-  }
-  .dropzone:hover, .dropzone.drag{border-color:var(--accent);background:var(--panel-2);}
-  .dropzone .icon{
-    width:52px;height:52px;border-radius:14px;background:var(--accent-dim);margin:0 auto 16px;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .dropzone .icon svg{width:24px;height:24px;stroke:var(--accent);}
-  .dropzone .title{font-weight:700;font-size:15.5px;margin-bottom:6px;}
-  .dropzone .hint{font-size:13px;color:var(--text-dimmer);}
-  .loadbar{
-    width:100%;max-width:560px;margin-top:22px;height:6px;background:var(--panel-2);
-    border-radius:6px;overflow:hidden;border:1px solid var(--border-soft);display:none;
-  }
-  .loadbar.show{display:block;}
-  .loadbar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#5a6edc);transition:width .2s ease;}
-  .load-status{margin-top:12px;font-size:12.5px;color:var(--text-dimmer);font-family:'JetBrains Mono';display:none;}
-  .load-status.show{display:block;}
-  .upload-error{margin-top:16px;color:var(--red);font-size:13px;display:none;max-width:560px;}
-  .upload-error.show{display:block;}
-
-  /* ---------- Config screen: study mode ---------- */
   .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .mode-card{
     border:1px solid var(--border);background:var(--panel-2);border-radius:12px;padding:16px 16px;
@@ -172,10 +127,6 @@
   .mode-card.active .m-title{color:var(--accent);}
   .mode-card .m-desc{font-size:12px;color:var(--text-dimmer);line-height:1.4;}
 
-  .section-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dimmer);margin:20px 0 10px;font-weight:700;}
-  .section-label:first-child{margin-top:0;}
-
-  /* ---------- Block summary panel ---------- */
   .summary-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;}
   .summary-row:last-of-type{border-bottom:none;}
   .summary-row .label{color:var(--text-dimmer);}
@@ -194,46 +145,25 @@
   .avail-note{font-size:12px;color:var(--text-dimmer);margin-top:8px;font-family:'JetBrains Mono';}
   .start-btn{width:100%;justify-content:center;padding:13px;font-size:14.5px;margin-top:18px;}
 
-  /* ---------- Quiz layout ---------- */
   .quiz-shell{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:start;}
   @media (max-width:880px){.quiz-shell{grid-template-columns:1fr;}}
   .quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
-  .quiz-header .qtag{
-    font-size:11px;font-weight:700;padding:5px 10px;border-radius:7px;background:var(--accent-dim);
-    color:var(--accent);letter-spacing:.3px;
-  }
+  .quiz-header .qtag{font-size:11px;font-weight:700;padding:5px 10px;border-radius:7px;background:var(--accent-dim);color:var(--accent);letter-spacing:.3px;}
   .quiz-progress{font-family:'JetBrains Mono';font-size:12.5px;color:var(--text-dimmer);}
-  .timer-chip{
-    font-family:'JetBrains Mono';font-weight:700;font-size:13px;padding:6px 12px;border-radius:8px;
-    border:1px solid var(--border);display:flex;align-items:center;gap:7px;
-  }
+  .timer-chip{font-family:'JetBrains Mono';font-weight:700;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;gap:7px;}
   .timer-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
   .timer-chip.low{color:var(--red);border-color:rgba(255,107,107,.4);}
   .timer-chip.low .dot{background:var(--red);}
-
   .q-card{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:26px 26px 22px;}
   .q-stem{font-size:16.5px;line-height:1.65;margin:0 0 22px;white-space:pre-wrap;}
-  .flag-btn{
-    border:1px solid var(--border);background:var(--panel-2);color:var(--text-dimmer);
-    width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-    cursor:pointer;flex:none;transition:.12s;
-  }
+  .flag-btn{border:1px solid var(--border);background:var(--panel-2);color:var(--text-dimmer);width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:.12s;}
   .flag-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;}
   .flag-btn.on{color:var(--amber);background:var(--amber-dim);border-color:rgba(245,185,66,.4);}
   .flag-btn.on svg{fill:var(--amber);}
-
   .options{display:flex;flex-direction:column;gap:10px;}
-  .opt{
-    display:flex;align-items:flex-start;gap:13px;border:1px solid var(--border);
-    background:var(--panel-2);border-radius:11px;padding:13px 15px;cursor:pointer;
-    transition:.12s ease;font-size:14.5px;line-height:1.5;
-  }
+  .opt{display:flex;align-items:flex-start;gap:13px;border:1px solid var(--border);background:var(--panel-2);border-radius:11px;padding:13px 15px;cursor:pointer;transition:.12s ease;font-size:14.5px;line-height:1.5;}
   .opt:hover:not(.locked){border-color:var(--accent-soft);background:#142542;}
-  .opt .letter{
-    flex:none;width:24px;height:24px;border-radius:7px;background:var(--panel);border:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-dim);
-    font-family:'JetBrains Mono';
-  }
+  .opt .letter{flex:none;width:24px;height:24px;border-radius:7px;background:var(--panel);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-dim);font-family:'JetBrains Mono';}
   .opt .otext{flex:1;padding-top:2px;}
   .opt .mark{flex:none;width:18px;height:18px;margin-top:2px;}
   .opt .mark svg{width:18px;height:18px;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;}
@@ -245,52 +175,31 @@
   .opt.incorrect .mark svg{stroke:var(--red);}
   .opt.locked{cursor:default;}
   .opt.dim{opacity:.55;}
-
-  .explain-box{
-    margin-top:20px;border-radius:14px;padding:20px 22px 22px;font-size:14.5px;line-height:1.7;
-    border:1px solid;border-left-width:4px;white-space:pre-wrap;color:var(--text);
-    box-shadow:0 8px 24px rgba(0,0,0,.18);
-  }
+  .explain-box{margin-top:20px;border-radius:14px;padding:20px 22px 22px;font-size:14.5px;line-height:1.7;border:1px solid;border-left-width:4px;white-space:pre-wrap;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.18);}
   .explain-box.ok{background:var(--green-dim);border-color:rgba(61,220,151,.3);border-left-color:var(--green);}
   .explain-box.bad{background:var(--red-dim);border-color:rgba(255,107,107,.3);border-left-color:var(--red);}
-  .explain-box .exp-head{
-    display:flex;align-items:center;gap:10px;font-weight:700;font-size:15.5px;margin:0 0 12px;
-    font-family:'Space Grotesk';letter-spacing:.2px;
-  }
-  .explain-box .exp-icon{
-    flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  }
+  .explain-box .exp-head{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15.5px;margin:0 0 12px;font-family:'Space Grotesk';letter-spacing:.2px;}
+  .explain-box .exp-icon{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
   .explain-box .exp-icon svg{width:15px;height:15px;}
   .explain-box.ok .exp-head{color:var(--green);}
   .explain-box.ok .exp-icon{background:var(--green);color:#04241a;}
   .explain-box.bad .exp-head{color:var(--red);}
   .explain-box.bad .exp-icon{background:var(--red);color:#2c0808;}
   .explain-box .exp-body{color:var(--text-dim);}
-
   .q-footer{display:flex;justify-content:space-between;align-items:center;margin-top:22px;}
 
-  /* Sidebar question nav */
   .side-panel{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:16px;}
   .side-panel h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dimmer);margin:0 0 12px;font-weight:700;}
   .qnav{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;max-height:420px;overflow-y:auto;padding-right:2px;}
-  .qnum{
-    aspect-ratio:1;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);
-    display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'JetBrains Mono';
-    font-weight:600;color:var(--text-dim);cursor:pointer;position:relative;
-  }
+  .qnum{aspect-ratio:1;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'JetBrains Mono';font-weight:600;color:var(--text-dim);cursor:pointer;position:relative;}
   .qnum:hover{border-color:var(--accent-soft);}
   .qnum.current{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
   .qnum.correct{background:var(--green-dim);color:var(--green);border-color:rgba(61,220,151,.4);}
   .qnum.incorrect{background:var(--red-dim);color:var(--red);border-color:rgba(255,107,107,.4);}
   .qnum .fdot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;border-radius:50%;background:var(--amber);}
 
-  /* ---------- Flashcards ---------- */
   .flash-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 30px;}
-  .flash-card{
-    width:100%;max-width:640px;min-height:320px;border-radius:18px;border:1px solid var(--border-soft);
-    background:var(--panel);padding:36px 34px;display:flex;flex-direction:column;justify-content:center;
-    cursor:pointer;position:relative;
-  }
+  .flash-card{width:100%;max-width:640px;min-height:320px;border-radius:18px;border:1px solid var(--border-soft);background:var(--panel);padding:36px 34px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;position:relative;}
   .flash-face-label{font-family:'JetBrains Mono';font-size:11px;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;}
   .flash-stem{font-size:18px;line-height:1.6;font-weight:500;}
   .flash-answer{font-size:15px;line-height:1.5;color:var(--green);font-weight:700;margin-bottom:12px;}
@@ -298,12 +207,8 @@
   .flash-hint{margin-top:22px;font-size:12px;color:var(--text-dimmer);text-align:center;}
   .flash-controls{display:flex;gap:10px;margin-top:22px;}
 
-  /* ---------- Summary screen ---------- */
   .score-hero{text-align:center;padding:30px 10px 10px;}
-  .score-ring{
-    width:150px;height:150px;border-radius:50%;margin:0 auto 20px;position:relative;
-    display:flex;align-items:center;justify-content:center;
-  }
+  .score-ring{width:150px;height:150px;border-radius:50%;margin:0 auto 20px;position:relative;display:flex;align-items:center;justify-content:center;}
   .score-ring .num{font-family:'Space Grotesk';font-size:32px;font-weight:700;}
   .score-ring .sub{font-family:'JetBrains Mono';font-size:11px;color:var(--text-dimmer);position:absolute;bottom:38px;}
   .score-stats{display:flex;justify-content:center;gap:26px;margin:18px 0 30px;flex-wrap:wrap;}
@@ -314,173 +219,134 @@
   .score-stat.a .n{color:var(--amber);}
   .score-stat .l{font-size:11px;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:.6px;margin-top:3px;}
   .review-list{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
-  .review-item{
-    display:flex;align-items:center;gap:12px;border:1px solid var(--border-soft);background:var(--panel-2);
-    border-radius:10px;padding:11px 14px;cursor:pointer;font-size:13.5px;
-  }
+  .review-item{display:flex;align-items:center;gap:12px;border:1px solid var(--border-soft);background:var(--panel-2);border-radius:10px;padding:11px 14px;cursor:pointer;font-size:13.5px;}
   .review-item:hover{border-color:var(--accent-soft);}
-  .review-item .ri-badge{
-    flex:none;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:700;font-family:'JetBrains Mono';
-  }
+  .review-item .ri-badge{flex:none;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'JetBrains Mono';}
   .review-item.wrong .ri-badge{background:var(--red-dim);color:var(--red);}
   .review-item .ri-text{flex:1;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .end-actions{display:flex;gap:10px;justify-content:center;margin-top:26px;flex-wrap:wrap;}
-
   .empty-note{text-align:center;color:var(--text-dimmer);font-size:13.5px;padding:30px 10px;}
   .hidden{display:none !important;}
+  .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center;}
+  .loading-screen .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:20px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
-/* ============================================================
-   MCQ Trainer — single-file study app
-   Data model per question: { id, stem, options[], correct_option, explanation, tags[], source }
-   ============================================================ */
+const API_BASE = 'http://localhost:3000/api';
 
 const state = {
-  screen: 'upload',           // upload | config | quiz | flash | summary
-  library: [],                // flat array of all questions, each tagged with _source/_subject
-  sources: {},                 // sourceName -> Set(subjectNames)
-  fileCount: 0,
+  screen: 'loading',
+  library: [],
+  sources: {},
+  sourceCounts: {},
   qCount: 0,
-
   selSource: 'ALL',
   selSubjects: new Set(['ALL']),
-  statusFilter: 'all',        // all | unused | correct | incorrect | flagged
-  mode: 'tutor',               // tutor | timed | mock | flashcards
+  statusFilter: 'all',
+  mode: 'tutor',
   blockSize: 40,
-
-  progress: {},                // id -> { status: 'correct'|'incorrect', flagged: bool, selected: idx }
-
-  block: [],                   // array of question objects for current run
-  idx: 0,                      // current index within block
-  revealed: false,             // whether current question answer has been revealed (tutor/timed)
-  reviewMode: false,           // true when browsing a finished block (feedback always shown, no scoring)
+  progress: {},
+  block: [],
+  idx: 0,
+  revealed: false,
+  reviewMode: false,
   timerSec: 0,
   timerHandle: null,
   flashFlipped: false,
 };
 
 const TIMED_SECONDS = 90;
+const MODES = [
+  {id:'tutor', icon:'🎓', title:'Tutor Mode', desc:'See the correct answer and explanation right after each question.'},
+  {id:'timed', icon:'⏱️', title:'Timed Mode', desc:'Same as Tutor, with a countdown clock racing each question.'},
+  {id:'mock', icon:'📝', title:'Mock Exam', desc:'No feedback until the end — simulates real exam conditions.'},
+  {id:'flashcards', icon:'🗂️', title:'Flashcards', desc:'Flip-card revision, no scoring — just quick recall practice.'},
+];
 
-/* ---------------- Utility ---------------- */
 function el(html){
   const t = document.createElement('template');
   t.innerHTML = html.trim();
   return t.content.firstElementChild;
 }
+
 function esc(s){
   return String(s == null ? '' : s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 }
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
-}
+
 function letterFor(i){ return String.fromCharCode(65+i); }
 
-/* ---------------- Data loading ---------------- */
-async function handleZipFile(file){
-  const dz = document.getElementById('dropzone');
-  const bar = document.getElementById('loadbar');
-  const fill = document.getElementById('loadbar-fill');
-  const status = document.getElementById('load-status');
-  const errBox = document.getElementById('upload-error');
-  errBox.classList.remove('show');
-  bar.classList.add('show');
-  status.classList.add('show');
-  fill.style.width = '4%';
-  status.textContent = 'Reading archive…';
+function okIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`; }
+function xIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>`; }
 
-  try{
-    const zip = await JSZip.loadAsync(file);
-    const entries = Object.values(zip.files).filter(f => !f.dir && f.name.toLowerCase().endsWith('.json'));
-    if(entries.length === 0) throw new Error('No .json question files found inside the zip.');
+function getProgress(id){ return state.progress[id] || null; }
 
-    const lib = [];
-    const sourceMap = {};
-    let done = 0;
+function normalizeQuestion(q) {
+  return {
+    id: q.id || q._id || Math.random().toString(36).substr(2, 9),
+    stem: q.stem || q.question || 'Question text missing',
+    options: q.options || [],
+    correct_option: typeof q.correct_option === 'number' ? q.correct_option : 0,
+    answer: q.answer || (q.options && q.options[q.correct_option]) || '',
+    explanation: q.explanation || 'No explanation provided.',
+    _source: q._source || 'Unknown',
+    _subject: q._subject || 'Untitled'
+  };
+}
 
-    for(const entry of entries){
-      const txt = await entry.async('string');
-      done++;
-      fill.style.width = (4 + (done/entries.length)*90) + '%';
-      status.textContent = `Parsing ${done}/${entries.length} · ${entry.name.split('/').pop()}`;
-
-      let data;
-      try{ data = JSON.parse(txt); } catch(e){ continue; }
-      if(!Array.isArray(data)) continue;
-
-      const parts = entry.name.split('/').filter(Boolean);
-      const topFolder = parts.length > 1 ? parts[0] : (data[0] && data[0].source) || (data[0] && data[0]._source) || 'Unsorted';
-      const fileBase = parts[parts.length-1].replace(/\.json$/i,'');
-
-      // Extract source and subject from the data
-      data.forEach((q, i) => {
-        if(!q || !q.stem || !Array.isArray(q.options)) return;
-        
-        // --- FIX: Handle both formats (exporter's and trainer's) ---
-        // Get source: prefer _source, then source, then fallback
-        const source = q._source || q.source || topFolder || 'Unknown';
-        
-        // Get subject: prefer _subject, then use first tag, then fallback
-        let subject = q._subject || null;
-        if (!subject && q.tags) {
-          if (Array.isArray(q.tags) && q.tags.length > 0) {
-            subject = q.tags[0]; // Use first tag as subject
-          } else if (typeof q.tags === 'string') {
-            subject = q.tags;
-          }
-        }
-        if (!subject) subject = fileBase || 'Untitled';
-        
-        // Build source map
-        if(!sourceMap[source]) sourceMap[source] = new Set();
-        sourceMap[source].add(subject);
-
-        lib.push({
-          id: q.id || (source+'|'+subject+'|'+i),
-          stem: q.stem,
-          options: q.options,
-          correct_option: typeof q.correct_option === 'number' ? q.correct_option : 0,
-          explanation: q.explanation || '',
-          _source: source,
-          _subject: subject,
-          // Preserve original fields for safety
-          source: q.source || source,
-          tags: q.tags || [subject]
-        });
-      });
+async function fetchData(){
+  try {
+    const sourcesResp = await fetch(`${API_BASE}/sources`);
+    const sourcesData = await sourcesResp.json();
+    state.sources = sourcesData.sources;
+    
+    const statsResp = await fetch(`${API_BASE}/stats`);
+    const statsData = await statsResp.json();
+    state.qCount = statsData.totalQuestions;
+    
+    const allCountsResp = await fetch(`${API_BASE}/subject-counts/ALL`);
+    const allCounts = await allCountsResp.json();
+    state.sourceCounts = { 'ALL': allCounts.counts };
+    
+    for (const source of Object.keys(state.sources)) {
+      const resp = await fetch(`${API_BASE}/subject-counts/${encodeURIComponent(source)}`);
+      const data = await resp.json();
+      state.sourceCounts[source] = data.counts;
     }
-
-    if(lib.length === 0) throw new Error('The archive parsed, but no valid questions were found.');
-
-    state.library = lib;
-    state.sources = sourceMap;
-    state.fileCount = entries.length;
-    state.qCount = lib.length;
-    state.selSource = 'ALL';
-    state.selSubjects = new Set(['ALL']);
-
-    status.textContent = `Loaded ${lib.length.toLocaleString()} questions from ${entries.length} files ✓`;
-    fill.style.width = '100%';
-    setTimeout(() => { state.screen = 'config'; render(); }, 350);
-
-  }catch(err){
-    bar.classList.remove('show');
-    status.classList.remove('show');
-    errBox.textContent = 'Could not load that file — ' + err.message;
-    errBox.classList.add('show');
+    
+    const allQuestionsResp = await fetch(`${API_BASE}/questions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: 'ALL', subject: 'ALL', count: 50000, shuffle: false })
+    });
+    const allData = await allQuestionsResp.json();
+    state.library = allData.questions.map(q => normalizeQuestion(q));
+    
+    return true;
+  } catch(e) {
+    console.error('Error fetching data:', e);
+    alert('Could not connect to API. Make sure the server is running on http://localhost:3000');
+    return false;
   }
 }
 
-/* ---------------- Filtering ---------------- */
+async function fetchQuestions(source, subject, count){
+  try {
+    const resp = await fetch(`${API_BASE}/questions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source, subject, count, shuffle: true })
+    });
+    const data = await resp.json();
+    return data.questions || [];
+  } catch(e) {
+    console.error('Error fetching questions:', e);
+    return [];
+  }
+}
+
 function subjectsForSource(sourceName){
   if(sourceName === 'ALL'){
     const all = new Set();
@@ -488,10 +354,6 @@ function subjectsForSource(sourceName){
     return Array.from(all).sort();
   }
   return Array.from(state.sources[sourceName] || []).sort();
-}
-
-function getProgress(id){
-  return state.progress[id] || null;
 }
 
 function matchesStatus(q){
@@ -531,7 +393,6 @@ function statusCounts(){
   return {all: pool.length, unused, correct, incorrect, flagged};
 }
 
-/* ---------------- Rendering: shell ---------------- */
 function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
@@ -553,7 +414,7 @@ function topbar(){
         </div>
       </div>
       <div class="topbar-right">
-        ${loaded ? `<span class="mono">${state.qCount.toLocaleString()} questions loaded</span>` : ''}
+        ${loaded ? `<span class="mono">${state.qCount.toLocaleString()} questions</span>` : 'Loading...'}
         <span class="pulse-dot ${loaded ? '' : 'off'}"></span>
       </div>
     </div>
@@ -563,7 +424,7 @@ function topbar(){
 
 function wrap(){
   const w = el('<div class="wrap"></div>');
-  if(state.screen === 'upload') w.appendChild(uploadScreen());
+  if(state.screen === 'loading') w.appendChild(loadingScreen());
   else if(state.screen === 'config') w.appendChild(configScreen());
   else if(state.screen === 'quiz') w.appendChild(quizScreen());
   else if(state.screen === 'flash') w.appendChild(flashScreen());
@@ -571,65 +432,29 @@ function wrap(){
   return w;
 }
 
-/* ---------------- Upload screen ---------------- */
-function uploadScreen(){
-  const wrap = el(`
-    <div class="upload-hero">
-      <div class="upload-eyebrow">Step 1 of 2</div>
-      <h1>Load your question bank</h1>
-      <p>Auto-loading <code class="mono">${AUTOLOAD_ZIP_NAME}</code> from this file's folder. If it isn't there, drop your .zip below instead — everything is parsed right here in your browser, nothing is uploaded anywhere.</p>
-      <div class="dropzone" id="dropzone">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
-          </svg>
-        </div>
-        <div class="title">Drop your .zip here, or click to browse</div>
-        <div class="hint">Fallback only — rename your export to ${AUTOLOAD_ZIP_NAME} to skip this entirely</div>
-        <input type="file" id="fileInput" accept=".zip" style="display:none">
-      </div>
-      <div class="loadbar" id="loadbar"><div class="loadbar-fill" id="loadbar-fill"></div></div>
-      <div class="load-status" id="load-status"></div>
-      <div class="upload-error" id="upload-error"></div>
+function loadingScreen(){
+  return el(`
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <h2 class="disp" style="font-size:22px;margin:0 0 8px;">Loading from API</h2>
+      <p style="color:var(--text-dimmer);font-size:14px;">Fetching questions...</p>
     </div>
   `);
-  const dz = wrap.querySelector('#dropzone');
-  const input = wrap.querySelector('#fileInput');
-  dz.addEventListener('click', () => input.click());
-  input.addEventListener('change', e => { if(e.target.files[0]) handleZipFile(e.target.files[0]); });
-  ['dragover','dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
-  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
-  dz.addEventListener('drop', e => {
-    const f = e.dataTransfer.files[0];
-    if(f) handleZipFile(f);
-  });
-  return wrap;
 }
-
-/* ---------------- Config screen ---------------- */
-const MODES = [
-  {id:'tutor', icon:'🎓', title:'Tutor Mode', desc:'See the correct answer and explanation right after each question.'},
-  {id:'timed', icon:'⏱️', title:'Timed Mode', desc:'Same as Tutor, with a countdown clock racing each question.'},
-  {id:'mock', icon:'📝', title:'Mock Exam', desc:'No feedback until the end — simulates real exam conditions.'},
-  {id:'flashcards', icon:'🗂️', title:'Flashcards', desc:'Flip-card revision, no scoring — just quick recall practice.'},
-];
 
 function configScreen(){
   const counts = statusCounts();
   const wrap = el('<div></div>');
 
   wrap.appendChild(el(`<div style="margin-bottom:22px;">
-    <div class="upload-eyebrow">Step 2 of 2</div>
-    <h1 class="disp" style="font-size:26px;margin:6px 0 4px;">Set up your block</h1>
-    <p style="color:var(--text-dim);font-size:14px;margin:0;">${state.qCount.toLocaleString()} questions across ${Object.keys(state.sources).length} sources · loaded from ${state.fileCount} files</p>
+    <div class="upload-eyebrow">Select Your Block</div>
+    <h1 class="disp" style="font-size:26px;margin:6px 0 4px;">Choose Source & Subject</h1>
+    <p style="color:var(--text-dim);font-size:14px;margin:0;">${state.qCount.toLocaleString()} questions across ${Object.keys(state.sources).length} sources</p>
   </div>`));
 
   const grid = el('<div class="grid-2"></div>');
-
-  /* LEFT column */
   const left = el('<div></div>');
 
-  // Study mode
   const modePanel = el('<div class="panel"><h2>Study Mode</h2><div class="mode-grid" id="mode-grid"></div></div>');
   const modeGrid = modePanel.querySelector('#mode-grid');
   MODES.forEach(m => {
@@ -644,30 +469,36 @@ function configScreen(){
   });
   left.appendChild(modePanel);
 
-  // Source
   const sourcePanel = el('<div class="panel"><h2>Source</h2><div class="pill-row" id="source-row"></div></div>');
   const sourceRow = sourcePanel.querySelector('#source-row');
-  const allSourcesCount = state.qCount;
-  sourceRow.appendChild(pillBtn('All Sources', allSourcesCount, state.selSource==='ALL', () => {
+  
+  const allTotal = Object.values(state.sourceCounts['ALL'] || {}).reduce((sum, c) => sum + c, 0);
+  sourceRow.appendChild(pillBtn('All Sources', allTotal, state.selSource==='ALL', () => {
     state.selSource = 'ALL'; state.selSubjects = new Set(['ALL']); render();
   }));
+  
   Object.keys(state.sources).sort().forEach(src => {
-    const cnt = state.library.filter(q => q._source === src).length;
-    sourceRow.appendChild(pillBtn(src, cnt, state.selSource===src, () => {
+    const counts = state.sourceCounts[src] || {};
+    const total = Object.values(counts).reduce((sum, c) => sum + c, 0);
+    sourceRow.appendChild(pillBtn(src, total, state.selSource===src, () => {
       state.selSource = src; state.selSubjects = new Set(['ALL']); render();
     }));
   });
   left.appendChild(sourcePanel);
 
-  // Subject / tag
   const subjPanel = el('<div class="panel"><h2>Subject</h2><div class="pill-row" id="subject-row"></div></div>');
   const subjRow = subjPanel.querySelector('#subject-row');
-  const subjPool = state.library.filter(q => state.selSource==='ALL' || q._source===state.selSource);
-  subjRow.appendChild(pillBtn('All Subjects', subjPool.length, state.selSubjects.has('ALL'), () => {
+  
+  const countsObj = state.sourceCounts[state.selSource] || {};
+  const subjList = Object.keys(countsObj).sort();
+  const totalSubjQuestions = Object.values(countsObj).reduce((sum, c) => sum + c, 0);
+  
+  subjRow.appendChild(pillBtn('All Subjects', totalSubjQuestions, state.selSubjects.has('ALL'), () => {
     state.selSubjects = new Set(['ALL']); render();
   }));
-  subjectsForSource(state.selSource).forEach(subj => {
-    const cnt = subjPool.filter(q => q._subject === subj).length;
+  
+  subjList.forEach(subj => {
+    const cnt = countsObj[subj] || 0;
     const active = !state.selSubjects.has('ALL') && state.selSubjects.has(subj);
     subjRow.appendChild(pillBtn(subj, cnt, active, () => {
       state.selSubjects.delete('ALL');
@@ -678,7 +509,6 @@ function configScreen(){
   });
   left.appendChild(subjPanel);
 
-  // Status
   const statusPanel = el('<div class="panel"><h2>Status</h2><div class="pill-row" id="status-row"></div></div>');
   const statusRow = statusPanel.querySelector('#status-row');
   const statusDefs = [
@@ -697,7 +527,6 @@ function configScreen(){
 
   grid.appendChild(left);
 
-  /* RIGHT column — block summary */
   const filtered = filteredQuestions();
   const maxBlock = Math.max(1, filtered.length);
   if(state.blockSize > filtered.length) state.blockSize = Math.max(1, filtered.length);
@@ -746,8 +575,7 @@ function pillBtn(label, count, active, onClick){
   return b;
 }
 
-/* ---------------- Starting a block ---------------- */
-function startBlock(){
+async function startBlock(){
   const filtered = filteredQuestions();
   if(filtered.length === 0) return;
 
@@ -782,6 +610,7 @@ function startTimer(){
     updateTimerUI();
   }, 1000);
 }
+
 function updateTimerUI(){
   const chip = document.getElementById('timer-chip');
   if(!chip) return;
@@ -790,7 +619,6 @@ function updateTimerUI(){
   chip.classList.toggle('low', state.timerSec <= 15);
 }
 
-/* ---------------- Quiz screen ---------------- */
 function quizScreen(){
   const q = state.block[state.idx];
   const total = state.block.length;
@@ -800,7 +628,6 @@ function quizScreen(){
 
   const wrap = el('<div></div>');
   const shell = el('<div class="quiz-shell"></div>');
-
   const left = el('<div></div>');
 
   const header = el(`
@@ -828,44 +655,45 @@ function quizScreen(){
   card.appendChild(stemRow);
 
   const optWrap = el('<div class="options"></div>');
-  // "reveal" = whether correct/incorrect colours + explanation should be shown for THIS question.
-  // Tutor/Timed: as soon as the current question has been answered.
-  // Mock: only while browsing a finished block (reviewMode) — never during the live attempt.
   const reveal = isMock ? state.reviewMode : state.revealed;
   const selIdx = p ? (typeof p.selected === 'number' ? p.selected : null) : null;
 
-  q.options.forEach((opt, i) => {
-    const isCorrectOpt = i === q.correct_option;
-    const wasSelected = selIdx === i;
-    let cls = 'opt';
-    if(reveal){
-      cls += ' locked';
-      if(isCorrectOpt) cls += ' correct';
-      else if(wasSelected) cls += ' incorrect';
-      else cls += ' dim';
-    }
-    let markHtml = '';
-    if(reveal){
-      if(isCorrectOpt) markHtml = okIcon();
-      else if(wasSelected) markHtml = xIcon();
-    }
-    const row = el(`<div class="${cls}">
-        <span class="letter">${letterFor(i)}</span>
-        <span class="otext">${esc(opt)}</span>
-        <span class="mark">${markHtml}</span>
-      </div>`);
-    if(isMock && wasSelected && !reveal){
-      row.style.borderColor = 'var(--accent-soft)';
-      row.style.background = 'var(--accent-dim)';
-    }
-    if(!reveal){
-      row.addEventListener('click', () => {
-        if(isMock) selectMockAnswer(q, i);
-        else revealAnswer(i);
-      });
-    }
-    optWrap.appendChild(row);
-  });
+  if(q.options && q.options.length > 0){
+    q.options.forEach((opt, i) => {
+      const isCorrectOpt = i === q.correct_option;
+      const wasSelected = selIdx === i;
+      let cls = 'opt';
+      if(reveal){
+        cls += ' locked';
+        if(isCorrectOpt) cls += ' correct';
+        else if(wasSelected) cls += ' incorrect';
+        else cls += ' dim';
+      }
+      let markHtml = '';
+      if(reveal){
+        if(isCorrectOpt) markHtml = okIcon();
+        else if(wasSelected) markHtml = xIcon();
+      }
+      const row = el(`<div class="${cls}">
+          <span class="letter">${letterFor(i)}</span>
+          <span class="otext">${esc(opt)}</span>
+          <span class="mark">${markHtml}</span>
+        </div>`);
+      if(isMock && wasSelected && !reveal){
+        row.style.borderColor = 'var(--accent-soft)';
+        row.style.background = 'var(--accent-dim)';
+      }
+      if(!reveal){
+        row.addEventListener('click', () => {
+          if(isMock) selectMockAnswer(q, i);
+          else revealAnswer(i);
+        });
+      }
+      optWrap.appendChild(row);
+    });
+  } else {
+    optWrap.innerHTML = '<div style="color:var(--text-dimmer);padding:10px;">No options available.</div>';
+  }
   card.appendChild(optWrap);
 
   if(reveal){
@@ -911,9 +739,6 @@ function quizScreen(){
   return wrap;
 }
 
-function okIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`; }
-function xIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>`; }
-
 function selectMockAnswer(q, i){
   if(!state.progress[q.id]) state.progress[q.id] = {status:null, flagged:false, selected:null};
   state.progress[q.id].selected = i;
@@ -952,7 +777,6 @@ function goNext(){
 function finishBlock(){
   clearInterval(state.timerHandle);
   if(state.mode === 'mock'){
-    // score the whole mock block now that the attempt is over
     state.block.forEach(q => {
       const p = state.progress[q.id];
       if(p && p.selected != null){
@@ -973,7 +797,6 @@ function quizSidebar(){
     const p = getProgress(q.id);
     let cls = 'qnum';
     if(i === state.idx) cls += ' current';
-    // Colour only once the question has actually been scored (never during a live mock attempt).
     if(p && p.status){
       cls += p.status === 'correct' ? ' correct' : ' incorrect';
     }
@@ -997,7 +820,6 @@ function quizSidebar(){
   return panel;
 }
 
-/* ---------------- Flashcards ---------------- */
 function flashScreen(){
   const q = state.block[state.idx];
   const total = state.block.length;
@@ -1044,7 +866,6 @@ function flashScreen(){
   return wrap;
 }
 
-/* ---------------- Summary screen ---------------- */
 function summaryScreen(){
   const total = state.block.length;
   let correct=0, incorrect=0, flagged=0;
@@ -1109,33 +930,18 @@ function summaryScreen(){
   return wrap;
 }
 
-/* ---------------- Boot ---------------- */
-// Name of the zip file this trainer looks for automatically, in the SAME
-// folder as this html file. Rename your export to this (or change this
-// constant) and it loads with no click needed.
-const AUTOLOAD_ZIP_NAME = 'sources.zip';
-
-render();
-tryAutoLoadZip();
-
-async function tryAutoLoadZip(){
-  const status = document.getElementById('load-status');
-  const bar = document.getElementById('loadbar');
-  if(status){ status.classList.add('show'); status.textContent = `Looking for ${AUTOLOAD_ZIP_NAME} next to this file…`; }
-  try{
-    const resp = await fetch(AUTOLOAD_ZIP_NAME, {cache:'no-store'});
-    if(!resp.ok) throw new Error('not found');
-    const blob = await resp.blob();
-    await handleZipFile(blob);
-  }catch(e){
-    // No zip sitting next to this file (or the browser blocked a local
-    // fetch — Chrome does this when you open the .html by double-clicking
-    // instead of serving it, since file:// pages can't fetch siblings).
-    // Fall back silently to the manual dropzone below.
-    if(status){ status.classList.remove('show'); }
-    if(bar){ bar.classList.remove('show'); }
+async function init(){
+  state.screen = 'loading';
+  render();
+  
+  const success = await fetchData();
+  if (success) {
+    state.screen = 'config';
+    render();
   }
 }
+
+init();
 </script>
 </body>
 </html>
