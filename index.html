@@ -243,9 +243,11 @@ const state = {
   // Metadata only (lightweight)
   metadata: {
     totalQuestions: 0,
-    sources: {}, // sourceName -> { subjects: [], counts: { subject: count } }
+    sources: {}, // sourceName -> [subjects]
     sourceCounts: {}, // sourceName -> { subject: count }
+    sourceTotals: {}, // sourceName -> total questions
     allSubjects: [], // all subject names
+    allSubjectCounts: {}, // { subject: count }
   },
   // UI state
   selSource: 'ALL',
@@ -304,54 +306,51 @@ function normalizeQuestion(q) {
   };
 }
 
-async function fetchMetadata() {
+// NEW: Single dashboard fetch - replaces all metadata requests
+async function fetchDashboard() {
   try {
-    // Get sources and their subjects
-    const sourcesResp = await fetch(`${API_BASE}/sources`);
-    const sourcesData = await sourcesResp.json();
-    const sources = sourcesData.sources || {};
-    
-    // Get total count from stats
-    const statsResp = await fetch(`${API_BASE}/stats`);
-    const statsData = await statsResp.json();
-    const totalQuestions = statsData.totalQuestions || 0;
-    
-    // Get subject counts for ALL sources
-    const allCountsResp = await fetch(`${API_BASE}/subject-counts/ALL`);
-    const allCountsData = await allCountsResp.json();
-    const allCounts = allCountsData.counts || {};
-    
-    // Get subject counts for each source
-    const sourceCounts = {};
-    const allSubjectsSet = new Set();
-    
-    // Add ALL counts
-    sourceCounts['ALL'] = allCounts;
-    Object.keys(allCounts).forEach(subj => allSubjectsSet.add(subj));
-    
-    // Get per-source counts
-    for (const source of Object.keys(sources)) {
-      const resp = await fetch(`${API_BASE}/subject-counts/${encodeURIComponent(source)}`);
-      const data = await resp.json();
-      sourceCounts[source] = data.counts || {};
-      Object.keys(sourceCounts[source]).forEach(subj => allSubjectsSet.add(subj));
-    }
+    const resp = await fetch(`${API_BASE}/dashboard`);
+    const data = await resp.json();
     
     state.metadata = {
-      totalQuestions,
-      sources,
-      sourceCounts,
-      allSubjects: Array.from(allSubjectsSet).sort()
+      totalQuestions: data.totalQuestions,
+      sources: data.sources,
+      sourceCounts: data.sourceCounts,
+      sourceTotals: data.sourceTotals,
+      allSubjects: data.allSubjects,
+      allSubjectCounts: data.allSubjectCounts
     };
     
     return true;
   } catch(e) {
-    console.error('Error fetching metadata:', e);
+    console.error('Error fetching dashboard:', e);
     alert('Could not connect to API. Make sure the server is running.');
     return false;
   }
 }
 
+function subjectsForSource(sourceName) {
+  if (sourceName === 'ALL') {
+    return state.metadata.allSubjects || [];
+  }
+  return state.metadata.sources[sourceName] || [];
+}
+
+function getSubjectCounts(sourceName) {
+  if (sourceName === 'ALL') {
+    return state.metadata.allSubjectCounts || {};
+  }
+  return state.metadata.sourceCounts[sourceName] || {};
+}
+
+function totalForSource(sourceName) {
+  if (sourceName === 'ALL') {
+    return state.metadata.totalQuestions || 0;
+  }
+  return state.metadata.sourceTotals[sourceName] || 0;
+}
+
+// Keep fetchQuestions unchanged
 async function fetchQuestions(source, subject, count) {
   try {
     const resp = await fetch(`${API_BASE}/questions`, {
@@ -367,25 +366,7 @@ async function fetchQuestions(source, subject, count) {
   }
 }
 
-function subjectsForSource(sourceName) {
-  if (sourceName === 'ALL') {
-    return state.metadata.allSubjects;
-  }
-  const subjects = state.metadata.sources[sourceName] || [];
-  return Array.from(subjects).sort();
-}
-
-function getSubjectCounts(sourceName) {
-  return state.metadata.sourceCounts[sourceName] || {};
-}
-
-function totalForSource(sourceName) {
-  const counts = getSubjectCounts(sourceName);
-  return Object.values(counts).reduce((sum, c) => sum + c, 0);
-}
-
 function matchesStatus(q){
-  // This now works on the loaded block only
   const p = getProgress(q.id);
   switch(state.statusFilter){
     case 'unused': return !p || !p.status;
@@ -397,7 +378,6 @@ function matchesStatus(q){
 }
 
 function statusCounts(){
-  // This now works on the loaded block only
   let unused=0, correct=0, incorrect=0, flagged=0;
   state.block.forEach(q => {
     const p = getProgress(q.id);
@@ -981,11 +961,12 @@ function summaryScreen(){
   return wrap;
 }
 
+// Updated init to use fetchDashboard
 async function init(){
   state.screen = 'loading';
   render();
   
-  const success = await fetchMetadata();
+  const success = await fetchDashboard();
   if (success) {
     state.screen = 'config';
     render();
